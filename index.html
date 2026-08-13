@@ -16,62 +16,388 @@
   --text:#594714;
   --white:#fffdf5;
   --danger:#e66b55;
-  --green:#8aa85b;
   --shadow:0 8px 22px rgba(108,79,7,.12);
 }
+
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:var(--yellow);color:var(--text)}
-button,input{font:inherit}
-button{border:0;cursor:pointer}
-.app{min-height:100vh;padding:20px 16px 35px}
-.screen{max-width:620px;margin:auto}
-.header{display:flex;align-items:center;justify-content:space-between;margin:8px 0 22px}
-h1{font-size:30px;margin:0;font-weight:850;letter-spacing:-1px}
-h2{font-size:23px;margin:0 0 14px}
-h3{margin:0 0 8px}
-.sub{opacity:.7;margin-top:5px}
-.card{background:var(--cream);border-radius:25px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
-.party{display:flex;align-items:center;justify-content:space-between;background:var(--pastel);padding:17px;border-radius:20px;margin:10px 0;transition:.15s}
-.party:active{transform:scale(.98)}
-.party-info strong{display:block;font-size:19px}.party-info small{opacity:.65}
-.iconbtn,.back{width:45px;height:45px;border-radius:16px;background:var(--cream);color:var(--text);font-size:25px;box-shadow:var(--shadow)}
-.add{background:var(--text);color:white;width:55px;height:55px;border-radius:19px;font-size:30px}
-.primary{background:var(--text);color:#fff;padding:14px 18px;border-radius:17px;font-weight:750;width:100%;margin-top:8px}
-.secondary{background:var(--pastel2);color:var(--text);padding:11px 14px;border-radius:14px;font-weight:700}
-.danger{background:#ffd5c9;color:#9c3f2e;padding:10px 13px;border-radius:13px;font-weight:700}
-input{width:100%;border:0;outline:0;background:var(--pastel);padding:15px;border-radius:15px;color:var(--text);margin:7px 0}
-.empty{text-align:center;padding:40px 20px;opacity:.7}
-.people{display:flex;gap:8px;flex-wrap:wrap}
-.person{background:var(--pastel);padding:10px 13px;border-radius:15px;font-weight:700;display:flex;align-items:center;gap:8px}
-.person button{background:transparent;color:#9c3f2e;font-size:17px}
-.tabs{display:flex;background:var(--pastel);padding:5px;border-radius:17px;margin:15px 0}
-.tab{flex:1;padding:12px;border-radius:13px;background:transparent;color:var(--text);font-weight:800}
-.tab.active{background:var(--cream);box-shadow:0 3px 10px rgba(108,79,7,.1)}
-.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.option{background:var(--pastel);border-radius:17px;padding:15px 12px;text-align:left;min-height:72px;color:var(--text);font-weight:800}
-.option small{display:block;font-weight:500;opacity:.6;margin-top:4px}
-.person-row{background:var(--cream);padding:14px;border-radius:18px;margin:9px 0}
-.person-head{display:flex;justify-content:space-between;align-items:center}
-.person-head strong{font-size:18px}
-.counts{display:flex;gap:8px;margin-top:10px}
-.pill{background:var(--pastel);padding:8px 10px;border-radius:12px;font-size:13px}
-.history{margin-top:12px}
-.log{display:flex;align-items:center;justify-content:space-between;background:#fff7d3;padding:10px 12px;border-radius:13px;margin-top:6px;font-size:13px}
-.log button{background:#ffd5c9;color:#9c3f2e;border-radius:10px;padding:6px 8px}
-.modal-bg{position:fixed;inset:0;background:rgba(66,49,5,.35);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:20}
-.modal{width:min(620px,100%);background:var(--cream);border-radius:27px;padding:20px;max-height:90vh;overflow:auto}
-.modal-bg.show{display:flex}
-.modal-head{display:flex;justify-content:space-between;align-items:center}
-.chartbar{margin:13px 0}
-.chartlabel{display:flex;justify-content:space-between;font-weight:750;font-size:14px}
-.barbg{height:20px;background:var(--pastel);border-radius:10px;overflow:hidden;margin-top:6px}
-.bar{height:100%;background:var(--yellow-dark);border-radius:10px;min-width:3px}
-.rank{display:flex;align-items:center;gap:12px;background:var(--pastel);padding:13px;border-radius:16px;margin:8px 0}
-.ranknum{font-size:20px;font-weight:900;width:30px}
-.total{margin-left:auto;font-weight:900}
-.notice{font-size:12px;opacity:.65;text-align:center;margin-top:15px}
-@media(max-width:390px){.options{grid-template-columns:1fr}.app{padding-left:12px;padding-right:12px}}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  background:var(--yellow);
+  color:var(--text);
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+.app{
+  min-height:100vh;
+  padding:20px 16px 35px;
+}
+
+.screen{
+  max-width:620px;
+  margin:auto;
+}
+
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:8px 0 22px;
+}
+
+h1{
+  font-size:30px;
+  margin:0;
+  font-weight:850;
+  letter-spacing:-1px;
+}
+
+h2{
+  font-size:23px;
+  margin:0 0 14px;
+}
+
+h3{
+  margin:0 0 8px;
+}
+
+.sub{
+  opacity:.7;
+  margin-top:5px;
+}
+
+.card{
+  background:var(--cream);
+  border-radius:25px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:14px;
+}
+
+.party{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:var(--pastel);
+  padding:17px;
+  border-radius:20px;
+  margin:10px 0;
+  transition:.15s;
+}
+
+.party:active{
+  transform:scale(.98);
+}
+
+.party-info strong{
+  display:block;
+  font-size:19px;
+}
+
+.party-info small{
+  opacity:.65;
+}
+
+.iconbtn,
+.back{
+  width:45px;
+  height:45px;
+  border-radius:16px;
+  background:var(--cream);
+  color:var(--text);
+  font-size:25px;
+  box-shadow:var(--shadow);
+}
+
+.add{
+  background:var(--text);
+  color:white;
+  width:55px;
+  height:55px;
+  border-radius:19px;
+  font-size:30px;
+}
+
+.primary{
+  background:var(--text);
+  color:#fff;
+  padding:14px 18px;
+  border-radius:17px;
+  font-weight:750;
+  width:100%;
+  margin-top:8px;
+}
+
+.secondary{
+  background:var(--pastel2);
+  color:var(--text);
+  padding:11px 14px;
+  border-radius:14px;
+  font-weight:700;
+}
+
+.danger{
+  background:#ffd5c9;
+  color:#9c3f2e;
+  padding:10px 13px;
+  border-radius:13px;
+  font-weight:700;
+}
+
+input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:var(--pastel);
+  padding:15px;
+  border-radius:15px;
+  color:var(--text);
+  margin:7px 0;
+}
+
+.empty{
+  text-align:center;
+  padding:40px 20px;
+  opacity:.7;
+}
+
+.people{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.person{
+  background:var(--pastel);
+  padding:10px 13px;
+  border-radius:15px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.person button{
+  background:transparent;
+  color:#9c3f2e;
+  font-size:17px;
+}
+
+.tabs{
+  display:flex;
+  background:var(--pastel);
+  padding:5px;
+  border-radius:17px;
+  margin:15px 0;
+}
+
+.tab{
+  flex:1;
+  padding:12px;
+  border-radius:13px;
+  background:transparent;
+  color:var(--text);
+  font-weight:800;
+}
+
+.tab.active{
+  background:var(--cream);
+  box-shadow:0 3px 10px rgba(108,79,7,.1);
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.options{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.option{
+  background:var(--pastel);
+  border-radius:17px;
+  padding:15px 12px;
+  text-align:left;
+  min-height:72px;
+  color:var(--text);
+  font-weight:800;
+}
+
+.option small{
+  display:block;
+  font-weight:500;
+  opacity:.6;
+  margin-top:4px;
+}
+
+.person-row{
+  background:var(--cream);
+  padding:14px;
+  border-radius:18px;
+  margin:9px 0;
+}
+
+.person-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.person-head strong{
+  font-size:18px;
+}
+
+.counts{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.pill{
+  background:var(--pastel);
+  padding:8px 10px;
+  border-radius:12px;
+  font-size:13px;
+}
+
+.history{
+  margin-top:12px;
+}
+
+.log{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#fff7d3;
+  padding:10px 12px;
+  border-radius:13px;
+  margin-top:6px;
+  font-size:13px;
+  gap:10px;
+}
+
+.log button{
+  background:#ffd5c9;
+  color:#9c3f2e;
+  border-radius:10px;
+  padding:6px 8px;
+}
+
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(66,49,5,.35);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  padding:12px;
+  z-index:20;
+}
+
+.modal{
+  width:min(620px,100%);
+  background:var(--cream);
+  border-radius:27px;
+  padding:20px;
+  max-height:90vh;
+  overflow:auto;
+}
+
+.modal-bg.show{
+  display:flex;
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.chartbar{
+  margin:13px 0;
+}
+
+.chartlabel{
+  display:flex;
+  justify-content:space-between;
+  font-weight:750;
+  font-size:14px;
+}
+
+.barbg{
+  height:20px;
+  background:var(--pastel);
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:6px;
+}
+
+.bar{
+  height:100%;
+  background:var(--yellow-dark);
+  border-radius:10px;
+  min-width:3px;
+}
+
+.rank{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:var(--pastel);
+  padding:13px;
+  border-radius:16px;
+  margin:8px 0;
+}
+
+.ranknum{
+  font-size:20px;
+  font-weight:900;
+  width:30px;
+}
+
+.total{
+  margin-left:auto;
+  font-weight:900;
+}
+
+.notice{
+  font-size:12px;
+  opacity:.65;
+  text-align:center;
+  margin-top:15px;
+}
+
+.firebase-status{
+  text-align:center;
+  font-size:11px;
+  opacity:.55;
+  margin-top:8px;
+}
+
+@media(max-width:390px){
+  .options{
+    grid-template-columns:1fr;
+  }
+
+  .app{
+    padding-left:12px;
+    padding-right:12px;
+  }
+}
 </style>
 </head>
 
@@ -101,11 +427,6 @@ const firebaseConfig = {
   appId: "1:586341945009:web:cea538e985403fe7525c90"
 };
 
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.database();
-const partidaRef = db.ref("partida");
-
 const defaultDrink = {
   cups:["Calimocho","Vodka naranja","Ron cola","Glivery"],
   shots:["Plata o plomo","Tequila","Tequifresi"]
@@ -113,389 +434,822 @@ const defaultDrink = {
 
 let state = {
   parties:[],
-  drinkOptions:defaultDrink
+  drinkOptions:{
+    cups:[...defaultDrink.cups],
+    shots:[...defaultDrink.shots]
+  }
 };
 
 let current = null;
 let tab = "cups";
 
-function save(){
-  partidaRef.set(state);
+let db = null;
+let partidaRef = null;
+let firebaseReady = false;
+
+
+/* =========================
+   ID
+========================= */
+
+function makeId(){
+
+  if(
+    window.crypto &&
+    typeof window.crypto.randomUUID === "function"
+  ){
+    return window.crypto.randomUUID();
+  }
+
+  return "id-" +
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).slice(2) +
+    "-" +
+    Math.random().toString(36).slice(2);
 }
 
-partidaRef.on("value",snapshot=>{
-  const data = snapshot.val();
 
-  if(data){
-    state = data;
+/* =========================
+   FIREBASE
+========================= */
 
-    if(!state.parties) state.parties=[];
-    if(!state.drinkOptions) state.drinkOptions=defaultDrink;
-    if(!state.drinkOptions.cups) state.drinkOptions.cups=[];
-    if(!state.drinkOptions.shots) state.drinkOptions.shots=[];
+function startFirebase(){
 
-    if(current){
-      current = state.parties.find(p=>p.id===current.id) || null;
+  try{
+
+    if(!window.firebase){
+      console.warn("Firebase no está cargado.");
+      return;
     }
 
-    render();
-  }
-});
+    if(!firebase.apps.length){
+      firebase.initializeApp(firebaseConfig);
+    }
 
-function esc(s){
-  return String(s).replace(/[&<>"']/g,m=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
-  }[m]));
+    db=firebase.database();
+    partidaRef=db.ref("partida");
+
+    firebaseReady=true;
+
+    partidaRef.on(
+      "value",
+      snapshot=>{
+
+        const data=snapshot.val();
+
+        if(data){
+
+          state=data;
+
+          if(!Array.isArray(state.parties)){
+            state.parties=[];
+          }
+
+          if(!state.drinkOptions){
+            state.drinkOptions={
+              cups:[...defaultDrink.cups],
+              shots:[...defaultDrink.shots]
+            };
+          }
+
+          if(!Array.isArray(state.drinkOptions.cups)){
+            state.drinkOptions.cups=[];
+          }
+
+          if(!Array.isArray(state.drinkOptions.shots)){
+            state.drinkOptions.shots=[];
+          }
+
+          if(current){
+
+            current=
+              state.parties.find(
+                p=>p.id===current.id
+              ) || null;
+
+          }
+
+        }
+
+        render();
+
+      },
+      error=>{
+
+        console.warn(
+          "Firebase no disponible:",
+          error
+        );
+
+        firebaseReady=false;
+
+        render();
+
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Error iniciando Firebase:",
+      error
+    );
+
+    firebaseReady=false;
+
+    render();
+
+  }
+
 }
 
+
+/* =========================
+   GUARDAR
+========================= */
+
+function save(){
+
+  if(!firebaseReady || !partidaRef){
+    return;
+  }
+
+  partidaRef
+    .set(state)
+    .catch(error=>{
+
+      console.warn(
+        "No se pudo guardar:",
+        error
+      );
+
+    });
+
+}
+
+
+/* =========================
+   ESCAPAR TEXTO
+========================= */
+
+function esc(s){
+
+  return String(s).replace(
+    /[&<>"']/g,
+    m=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m])
+  );
+
+}
+
+
+/* =========================
+   NAVEGACIÓN
+========================= */
+
 function goHome(){
+
   current=null;
   render();
+
 }
 
 function party(id){
-  current=state.parties.find(p=>p.id===id);
+
+  current=
+    state.parties.find(
+      p=>p.id===id
+    ) || null;
+
   tab="cups";
+
   render();
+
 }
 
 function render(){
-  const r=document.getElementById("root");
-  if(!current) renderHome(r);
-  else renderParty(r);
+
+  const r=
+    document.getElementById("root");
+
+  if(!current){
+    renderHome(r);
+  }else{
+    renderParty(r);
+  }
+
 }
+
+
+/* =========================
+   PANTALLA PRINCIPAL
+========================= */
 
 function renderHome(r){
+
   r.innerHTML=`
-  <div class="header">
-    <div>
-      <h1>🍻 borrachos.com</h1>
-      <div class="sub">Tus fiestas, tus cuentas.</div>
-    </div>
-    <button class="add" onclick="newParty()">+</button>
-  </div>
 
-  <div class="card">
-    <h2>Mis fiestas</h2>
+    <div class="header">
 
-    ${
-      state.parties.length
-      ?
-      state.parties.map(p=>`
-        <div class="party" onclick="party('${p.id}')">
-          <div class="party-info">
-            <strong>${esc(p.name)}</strong>
-            <small>
-              ${new Date(p.createdAt).toLocaleDateString("es-ES")}
-              · ${p.people.length} personas
-              ${p.finished?" · Finalizada":""}
-            </small>
-          </div>
-          <span>›</span>
+      <div>
+
+        <h1>🍻 borrachos.com</h1>
+
+        <div class="sub">
+          Tus fiestas, tus cuentas.
         </div>
-      `).join("")
-      :
-      `<div class="empty">
-        Todavía no tienes fiestas.<br>
-        Pulsa <b>+</b> para crear la primera.
-      </div>`
-    }
 
-  </div>`;
-}
-
-function newParty(){
-  openModal(`
-    <div class="modal-head">
-      <h2>Nueva fiesta</h2>
-      <button class="iconbtn" onclick="closeModal()">×</button>
-    </div>
-
-    <input id="partyName" placeholder="Ej. Navidad" autofocus>
-
-    <button class="primary" onclick="createParty()">
-      Crear fiesta
-    </button>
-  `);
-}
-
-function createParty(){
-
-  const name =
-    document.getElementById("partyName").value.trim()
-    || "Fiesta sin nombre";
-
-  current={
-    id:crypto.randomUUID(),
-    name,
-    createdAt:Date.now(),
-    people:[],
-    logs:[],
-    finished:false
-  };
-
-  state.parties.unshift(current);
-
-  save();
-  closeModal();
-  render();
-}
-
-function renderParty(r){
-
-  const people=current.people;
-
-  r.innerHTML=`
-  <div class="header">
-
-    <button class="back" onclick="goHome()">‹</button>
-
-    <div style="text-align:center">
-      <h1>${esc(current.name)}</h1>
-      <div class="sub">
-        ${current.finished?"Fiesta finalizada":"Fiesta en curso"}
       </div>
-    </div>
 
-    <button class="iconbtn" onclick="partyMenu()">⋯</button>
+      <button
+        class="add"
+        type="button"
+        onclick="newParty()">
 
-  </div>
+        +
 
-  <div class="card">
-
-    <div class="section-title">
-      <h2>Personas</h2>
-
-      <button class="secondary" onclick="addPerson()">
-        + Añadir
       </button>
+
     </div>
 
-    <div class="people">
+    <div class="card">
+
+      <h2>Mis fiestas</h2>
 
       ${
-        people.length
-        ?
-        people.map(x=>`
-          <div class="person">
-            ${esc(x.name)}
+        state.parties.length
 
-            <button
-              onclick="removePerson('${x.id}');event.stopPropagation()">
-              ×
-            </button>
+        ?
+
+        state.parties.map(p=>`
+
+          <div
+            class="party"
+            onclick="party('${p.id}')">
+
+            <div class="party-info">
+
+              <strong>
+                ${esc(p.name)}
+              </strong>
+
+              <small>
+
+                ${new Date(
+                  p.createdAt
+                ).toLocaleDateString("es-ES")}
+
+                ·
+
+                ${p.people.length}
+                personas
+
+                ${
+                  p.finished
+                  ?" · Finalizada"
+                  :""
+                }
+
+              </small>
+
+            </div>
+
+            <span>›</span>
 
           </div>
+
         `).join("")
+
         :
-        `<div class="sub">
-          Añade a las personas que están en la fiesta.
+
+        `<div class="empty">
+
+          Todavía no tienes fiestas.<br>
+
+          Pulsa <b>+</b> para crear la primera.
+
         </div>`
       }
 
     </div>
 
-  </div>
+    <div class="firebase-status">
 
-  ${current.finished ? resultsHTML() : trackerHTML()}
+      ${
+        firebaseReady
+        ? "☁️ Sincronización online activada"
+        : "📱 Modo local"
+      }
 
-  <div class="notice">
-    Todo lo que añadas se puede eliminar si te equivocas.
-  </div>
+    </div>
+
   `;
+
 }
+
+
+/* =========================
+   NUEVA FIESTA
+========================= */
+
+function newParty(){
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>Nueva fiesta</h2>
+
+      <button
+        class="iconbtn"
+        type="button"
+        onclick="closeModal()">
+
+        ×
+
+      </button>
+
+    </div>
+
+    <input
+      id="partyName"
+      placeholder="Ej. Navidad"
+      autocomplete="off">
+
+    <button
+      class="primary"
+      type="button"
+      onclick="createParty()">
+
+      Crear fiesta
+
+    </button>
+
+  `);
+
+}
+
+
+/* =========================
+   CREAR FIESTA
+========================= */
+
+function createParty(){
+
+  const input=
+    document.getElementById("partyName");
+
+  const name=
+    input
+    ? input.value.trim()
+    : "";
+
+  const p={
+
+    id:makeId(),
+
+    name:
+      name ||
+      "Fiesta sin nombre",
+
+    createdAt:Date.now(),
+
+    people:[],
+
+    logs:[],
+
+    finished:false
+
+  };
+
+  state.parties.unshift(p);
+
+  current=p;
+
+  save();
+
+  closeModal();
+
+  render();
+
+}
+
+
+/* =========================
+   PANTALLA DE FIESTA
+========================= */
+
+function renderParty(r){
+
+  if(!Array.isArray(current.people)){
+    current.people=[];
+  }
+
+  if(!Array.isArray(current.logs)){
+    current.logs=[];
+  }
+
+  r.innerHTML=`
+
+    <div class="header">
+
+      <button
+        class="back"
+        type="button"
+        onclick="goHome()">
+
+        ‹
+
+      </button>
+
+      <div style="text-align:center">
+
+        <h1>
+          ${esc(current.name)}
+        </h1>
+
+        <div class="sub">
+
+          ${
+            current.finished
+            ?"Fiesta finalizada"
+            :"Fiesta en curso"
+          }
+
+        </div>
+
+      </div>
+
+      <button
+        class="iconbtn"
+        type="button"
+        onclick="partyMenu()">
+
+        ⋯
+
+      </button>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-title">
+
+        <h2>Personas</h2>
+
+        <button
+          class="secondary"
+          type="button"
+          onclick="addPerson()">
+
+          + Añadir
+
+        </button>
+
+      </div>
+
+      <div class="people">
+
+        ${
+          current.people.length
+
+          ?
+
+          current.people.map(x=>`
+
+            <div class="person">
+
+              ${esc(x.name)}
+
+              <button
+                type="button"
+                onclick="
+                  removePerson('${x.id}');
+                  event.stopPropagation();
+                ">
+
+                ×
+
+              </button>
+
+            </div>
+
+          `).join("")
+
+          :
+
+          `<div class="sub">
+
+            Añade a las personas que
+            están en la fiesta.
+
+          </div>`
+        }
+
+      </div>
+
+    </div>
+
+    ${
+      current.finished
+      ? resultsHTML()
+      : trackerHTML()
+    }
+
+    <div class="notice">
+
+      Todo lo que añadas se puede eliminar
+      si te equivocas.
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================
+   REGISTRO
+========================= */
 
 function trackerHTML(){
 
   if(!current.people.length){
 
     return `
-    <div class="card empty">
-      Añade al menos una persona para empezar a registrar
-      copas y chupitos.
-    </div>
-    `;
-  }
 
-  return `
-  <div class="card">
+      <div class="card empty">
 
-    <div class="tabs">
-
-      <button
-        class="tab ${tab==="cups"?"active":""}"
-        onclick="tab='cups';render()">
-        🍹 Copas
-      </button>
-
-      <button
-        class="tab ${tab==="shots"?"active":""}"
-        onclick="tab='shots';render()">
-        🥃 Chupitos
-      </button>
-
-    </div>
-
-    <div class="section-title">
-
-      <h2>
-        ${tab==="cups"?"Elige una copa":"Elige un chupito"}
-      </h2>
-
-      <button
-        class="secondary"
-        onclick="addOption('${tab}')">
-        + Añadir opción
-      </button>
-
-    </div>
-
-    <div class="options">
-
-      ${state.drinkOptions[tab].map(o=>`
-
-        <button
-          class="option"
-          onclick="chooseDrink('${encodeURIComponent(o)}')">
-
-          ${esc(o)}
-
-          <small>
-            Toca para registrar
-          </small>
-
-        </button>
-
-      `).join("")}
-
-    </div>
-
-    <div style="margin-top:20px">
-
-      <h2>Contador</h2>
-
-      ${current.people.map(personRow).join("")}
-
-    </div>
-
-    <button
-      class="primary"
-      onclick="finishParty()">
-      🏁 Finalizar fiesta
-    </button>
-
-  </div>
-  `;
-}
-
-function personRow(p){
-
-  const logs=current.logs.filter(
-    l=>l.personId===p.id
-  );
-
-  const cups=logs.filter(
-    l=>l.kind==="cups"
-  ).length;
-
-  const shots=logs.filter(
-    l=>l.kind==="shots"
-  ).length;
-
-  return `
-  <div class="person-row">
-
-    <div class="person-head">
-
-      <strong>${esc(p.name)}</strong>
-
-      <div class="counts">
-
-        <span class="pill">
-          🍹 ${cups}
-        </span>
-
-        <span class="pill">
-          🥃 ${shots}
-        </span>
+        Añade al menos una persona
+        para empezar a registrar
+        copas y chupitos.
 
       </div>
 
-    </div>
+    `;
 
-    ${
-      logs.length
-      ?
-      `
-      <div class="history">
+  }
+
+  return `
+
+    <div class="card">
+
+      <div class="tabs">
+
+        <button
+          class="tab ${tab==="cups"?"active":""}"
+          type="button"
+          onclick="tab='cups';render()">
+
+          🍹 Copas
+
+        </button>
+
+        <button
+          class="tab ${tab==="shots"?"active":""}"
+          type="button"
+          onclick="tab='shots';render()">
+
+          🥃 Chupitos
+
+        </button>
+
+      </div>
+
+      <div class="section-title">
+
+        <h2>
+
+          ${
+            tab==="cups"
+            ?"Elige una copa"
+            :"Elige un chupito"
+          }
+
+        </h2>
+
+        <button
+          class="secondary"
+          type="button"
+          onclick="addOption('${tab}')">
+
+          + Añadir opción
+
+        </button>
+
+      </div>
+
+      <div class="options">
 
         ${
-          logs
-          .slice()
-          .reverse()
-          .slice(0,6)
-          .map(l=>`
+          state.drinkOptions[tab].map(o=>`
 
-            <div class="log">
+            <button
+              class="option"
+              type="button"
+              onclick="
+                chooseDrink(
+                  '${encodeURIComponent(o)}'
+                )
+              ">
 
-              <span>
-                ${l.kind==="cups"?"🍹":"🥃"}
-                ${esc(l.drink)}
-                ·
-                ${new Date(l.time).toLocaleTimeString(
-                  "es-ES",
-                  {hour:"2-digit",minute:"2-digit"}
-                )}
-              </span>
+              ${esc(o)}
 
-              <button onclick="removeLog('${l.id}')">
-                Quitar
-              </button>
+              <small>
+                Toca para registrar
+              </small>
 
-            </div>
+            </button>
 
           `).join("")
         }
 
       </div>
-      `
-      :
-      ""
-    }
 
-  </div>
+      <div style="margin-top:20px">
+
+        <h2>Contador</h2>
+
+        ${current.people.map(personRow).join("")}
+
+      </div>
+
+      <button
+        class="primary"
+        type="button"
+        onclick="finishParty()">
+
+        🏁 Finalizar fiesta
+
+      </button>
+
+    </div>
+
   `;
+
 }
+
+
+/* =========================
+   FILA PERSONA
+========================= */
+
+function personRow(p){
+
+  const logs=
+    current.logs.filter(
+      l=>l.personId===p.id
+    );
+
+  const cups=
+    logs.filter(
+      l=>l.kind==="cups"
+    ).length;
+
+  const shots=
+    logs.filter(
+      l=>l.kind==="shots"
+    ).length;
+
+  return `
+
+    <div class="person-row">
+
+      <div class="person-head">
+
+        <strong>
+          ${esc(p.name)}
+        </strong>
+
+        <div class="counts">
+
+          <span class="pill">
+            🍹 ${cups}
+          </span>
+
+          <span class="pill">
+            🥃 ${shots}
+          </span>
+
+        </div>
+
+      </div>
+
+      ${
+        logs.length
+
+        ?
+
+        `<div class="history">
+
+          ${
+            logs
+            .slice()
+            .reverse()
+            .slice(0,6)
+            .map(l=>`
+
+              <div class="log">
+
+                <span>
+
+                  ${
+                    l.kind==="cups"
+                    ?"🍹"
+                    :"🥃"
+                  }
+
+                  ${esc(l.drink)}
+
+                  ·
+
+                  ${new Date(
+                    l.time
+                  ).toLocaleTimeString(
+                    "es-ES",
+                    {
+                      hour:"2-digit",
+                      minute:"2-digit"
+                    }
+                  )}
+
+                </span>
+
+                <button
+                  type="button"
+                  onclick="removeLog('${l.id}')">
+
+                  Quitar
+
+                </button>
+
+              </div>
+
+            `).join("")
+          }
+
+        </div>`
+
+        :
+
+        ""
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================
+   ELEGIR COPA / CHUPITO
+========================= */
 
 function chooseDrink(enc){
 
-  const drink=decodeURIComponent(enc);
+  const drink=
+    decodeURIComponent(enc);
 
   openModal(`
 
     <div class="modal-head">
 
       <h2>
-        ${tab==="cups"?"🍹 Copa":"🥃 Chupito"}
+
+        ${
+          tab==="cups"
+          ?"🍹 Copa"
+          :"🥃 Chupito"
+        }
+
       </h2>
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <p>
+
       <b>${esc(drink)}</b><br>
+
       <span class="sub">
         ¿Quién lo ha tomado?
       </span>
+
     </p>
 
     ${
@@ -503,11 +1257,14 @@ function chooseDrink(enc){
 
         <button
           class="option"
+          type="button"
           style="width:100%;margin:5px 0"
-          onclick="addLog(
-            '${p.id}',
-            '${encodeURIComponent(drink)}'
-          )">
+          onclick="
+            addLog(
+              '${p.id}',
+              '${encodeURIComponent(drink)}'
+            )
+          ">
 
           ${esc(p.name)}
 
@@ -517,34 +1274,60 @@ function chooseDrink(enc){
     }
 
   `);
+
 }
+
+
+/* =========================
+   AÑADIR REGISTRO
+========================= */
 
 function addLog(personId,enc){
 
   current.logs.push({
 
-    id:crypto.randomUUID(),
-    personId,
+    id:makeId(),
+
+    personId:personId,
+
     kind:tab,
+
     drink:decodeURIComponent(enc),
+
     time:Date.now()
 
   });
 
   save();
+
   closeModal();
+
   render();
+
 }
+
+
+/* =========================
+   QUITAR REGISTRO
+========================= */
 
 function removeLog(id){
 
-  current.logs=current.logs.filter(
-    l=>l.id!==id
-  );
+  current.logs=
+    current.logs.filter(
+      l=>l.id!==id
+    );
 
   save();
+
   render();
+
 }
+
+
+/* =========================
+   AÑADIR PERSONA
+========================= */
 
 function addPerson(){
 
@@ -556,48 +1339,83 @@ function addPerson(){
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <input
       id="personName"
-      placeholder="Nombre">
+      placeholder="Nombre"
+      autocomplete="off">
 
     <button
       class="primary"
+      type="button"
       onclick="createPerson()">
+
       Añadir
+
     </button>
 
   `);
+
 }
+
+
+/* =========================
+   CREAR PERSONA
+========================= */
 
 function createPerson(){
 
-  const name=
-    document.getElementById("personName")
-    .value.trim();
+  const input=
+    document.getElementById("personName");
 
-  if(!name)return;
+  const name=
+    input
+    ? input.value.trim()
+    : "";
+
+  if(!name){
+    return;
+  }
 
   current.people.push({
-    id:crypto.randomUUID(),
-    name
+
+    id:makeId(),
+
+    name:name
+
   });
 
   save();
+
   closeModal();
+
   render();
+
 }
+
+
+/* =========================
+   QUITAR PERSONA
+========================= */
 
 function removePerson(id){
 
-  const p=current.people.find(
-    x=>x.id===id
-  );
+  const p=
+    current.people.find(
+      x=>x.id===id
+    );
+
+  if(!p){
+    return;
+  }
 
   openModal(`
 
@@ -607,19 +1425,27 @@ function removePerson(id){
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <p>
-      ¿Quitar a <b>${esc(p.name)}</b>?
+
+      ¿Quitar a
+      <b>${esc(p.name)}</b>?
+
       Sus registros también se eliminarán.
+
     </p>
 
     <button
       class="danger"
+      type="button"
       style="width:100%"
       onclick="confirmRemovePerson('${id}')">
 
@@ -628,22 +1454,34 @@ function removePerson(id){
     </button>
 
   `);
+
 }
+
 
 function confirmRemovePerson(id){
 
-  current.people=current.people.filter(
-    p=>p.id!==id
-  );
+  current.people=
+    current.people.filter(
+      p=>p.id!==id
+    );
 
-  current.logs=current.logs.filter(
-    l=>l.personId!==id
-  );
+  current.logs=
+    current.logs.filter(
+      l=>l.personId!==id
+    );
 
   save();
+
   closeModal();
+
   render();
+
 }
+
+
+/* =========================
+   AÑADIR OPCIÓN
+========================= */
 
 function addOption(kind){
 
@@ -652,23 +1490,35 @@ function addOption(kind){
     <div class="modal-head">
 
       <h2>
-        Añadir ${kind==="cups"?"copa":"chupito"}
+
+        Añadir
+        ${
+          kind==="cups"
+          ?"copa"
+          :"chupito"
+        }
+
       </h2>
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <input
       id="optionName"
-      placeholder="Ej. Whisky cola">
+      placeholder="Ej. Whisky cola"
+      autocomplete="off">
 
     <button
       class="primary"
+      type="button"
       onclick="createOption('${kind}')">
 
       Añadir opción
@@ -676,24 +1526,48 @@ function addOption(kind){
     </button>
 
   `);
+
 }
+
+
+/* =========================
+   CREAR OPCIÓN
+========================= */
 
 function createOption(kind){
 
+  const input=
+    document.getElementById("optionName");
+
   const n=
-    document.getElementById("optionName")
-    .value.trim();
+    input
+    ? input.value.trim()
+    : "";
 
-  if(!n)return;
+  if(!n){
+    return;
+  }
 
-  if(!state.drinkOptions[kind].includes(n)){
+  if(
+    !state.drinkOptions[kind].includes(n)
+  ){
+
     state.drinkOptions[kind].push(n);
+
   }
 
   save();
+
   closeModal();
+
   render();
+
 }
+
+
+/* =========================
+   FINALIZAR FIESTA
+========================= */
 
 function finishParty(){
 
@@ -705,180 +1579,259 @@ function finishParty(){
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <p>
-      Podrás consultar las gráficas y la clasificación.
+
+      Podrás consultar las gráficas
+      y la clasificación.
+
       Los registros quedarán guardados.
+
     </p>
 
     <button
       class="primary"
-      onclick="
-        current.finished=true;
-        save();
-        closeModal();
-        render();
-      ">
+      type="button"
+      onclick="confirmFinishParty()">
 
       🏁 Sí, finalizar
 
     </button>
 
   `);
+
 }
+
+
+function confirmFinishParty(){
+
+  current.finished=true;
+
+  save();
+
+  closeModal();
+
+  render();
+
+}
+
+
+/* =========================
+   RESULTADOS
+========================= */
 
 function resultsHTML(){
 
-  const totals=current.people.map(p=>({
+  const totals=
+    current.people.map(p=>({
 
-    p,
+      p:p,
 
-    c:current.logs.filter(
-      l=>l.personId===p.id && l.kind==="cups"
-    ).length,
+      c:
+        current.logs.filter(
+          l=>
+            l.personId===p.id &&
+            l.kind==="cups"
+        ).length,
 
-    s:current.logs.filter(
-      l=>l.personId===p.id && l.kind==="shots"
-    ).length
+      s:
+        current.logs.filter(
+          l=>
+            l.personId===p.id &&
+            l.kind==="shots"
+        ).length
 
-  }));
+    }));
 
-  const max=Math.max(
-    1,
-    ...totals.map(x=>x.c+x.s)
-  );
+  const max=
+    Math.max(
+      1,
+      ...totals.map(
+        x=>x.c+x.s
+      )
+    );
 
-  const sorted=[
-    ...totals
-  ].sort(
-    (a,b)=>(b.c+b.s)-(a.c+a.s)
-  );
+  const sorted=
+    [...totals].sort(
+      (a,b)=>
+        (b.c+b.s) -
+        (a.c+a.s)
+    );
 
   return `
 
-  <div class="card">
+    <div class="card">
 
-    <h2>📊 Resultados</h2>
+      <h2>📊 Resultados</h2>
 
-    <p class="sub">
-      Copas + chupitos registrados durante la fiesta.
-    </p>
+      <p class="sub">
 
-    ${
-      totals.map(x=>`
+        Copas + chupitos registrados
+        durante la fiesta.
 
-        <div class="chartbar">
+      </p>
 
-          <div class="chartlabel">
+      ${
+        totals.map(x=>`
 
-            <span>
-              ${esc(x.p.name)}
-            </span>
+          <div class="chartbar">
 
-            <span>
-              ${x.c+x.s} total
-            </span>
+            <div class="chartlabel">
 
-          </div>
+              <span>
+                ${esc(x.p.name)}
+              </span>
 
-          <div class="barbg">
+              <span>
+                ${x.c+x.s} total
+              </span>
 
-            <div
-              class="bar"
-              style="width:${(x.c+x.s)/max*100}%">
+            </div>
+
+            <div class="barbg">
+
+              <div
+                class="bar"
+                style="
+                  width:${(x.c+x.s)/max*100}%;
+                ">
+              </div>
+
+            </div>
+
+            <div class="sub">
+
+              🍹 ${x.c} copas
+              ·
+              🥃 ${x.s} chupitos
+
             </div>
 
           </div>
 
-          <div class="sub">
-            🍹 ${x.c} copas · 🥃 ${x.s} chupitos
-          </div>
+        `).join("")
+      }
 
-        </div>
+    </div>
 
-      `).join("")
-    }
+    <div class="card">
 
-  </div>
+      <h2>🏆 Clasificación</h2>
 
-  <div class="card">
+      ${
+        sorted.map((x,i)=>`
 
-    <h2>🏆 Clasificación</h2>
+          <div class="rank">
 
-    ${
-      sorted.map((x,i)=>`
+            <div class="ranknum">
+              ${i+1}.
+            </div>
 
-        <div class="rank">
+            <strong>
+              ${esc(x.p.name)}
+            </strong>
 
-          <div class="ranknum">
-            ${i+1}.
-          </div>
-
-          <strong>
-            ${esc(x.p.name)}
-          </strong>
-
-          <div class="total">
-            ${x.c+x.s}
-          </div>
-
-        </div>
-
-      `).join("")
-    }
-
-  </div>
-
-  <div class="card">
-
-    <h2>🕒 Registro</h2>
-
-    ${
-      current.logs
-      .slice()
-      .sort((a,b)=>b.time-a.time)
-      .map(l=>{
-
-        let p=current.people.find(
-          x=>x.id===l.personId
-        );
-
-        return `
-
-          <div class="log">
-
-            <span>
-              ${esc(p?.name||"")}
-              ·
-              ${l.kind==="cups"?"🍹":"🥃"}
-              ${esc(l.drink)}
-            </span>
-
-            <span>
-              ${new Date(l.time).toLocaleTimeString(
-                "es-ES",
-                {hour:"2-digit",minute:"2-digit"}
-              )}
-            </span>
+            <div class="total">
+              ${x.c+x.s}
+            </div>
 
           </div>
 
-        `;
+        `).join("")
+      }
 
-      }).join("")
-      ||
-      `<div class="empty">No hay registros.</div>`
-    }
+    </div>
 
-  </div>
+    <div class="card">
+
+      <h2>🕒 Registro</h2>
+
+      ${
+        current.logs.length
+
+        ?
+
+        current.logs
+        .slice()
+        .sort(
+          (a,b)=>b.time-a.time
+        )
+        .map(l=>{
+
+          const p=
+            current.people.find(
+              x=>x.id===l.personId
+            );
+
+          return `
+
+            <div class="log">
+
+              <span>
+
+                ${esc(
+                  p?.name || ""
+                )}
+
+                ·
+
+                ${
+                  l.kind==="cups"
+                  ?"🍹"
+                  :"🥃"
+                }
+
+                ${esc(l.drink)}
+
+              </span>
+
+              <span>
+
+                ${new Date(
+                  l.time
+                ).toLocaleTimeString(
+                  "es-ES",
+                  {
+                    hour:"2-digit",
+                    minute:"2-digit"
+                  }
+                )}
+
+              </span>
+
+            </div>
+
+          `;
+
+        }).join("")
+
+        :
+
+        `<div class="empty">
+
+          No hay registros.
+
+        </div>`
+      }
+
+    </div>
 
   `;
+
 }
+
+
+/* =========================
+   MENÚ DE FIESTA
+========================= */
 
 function partyMenu(){
 
@@ -890,21 +1843,20 @@ function partyMenu(){
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <button
       class="secondary"
+      type="button"
       style="width:100%;margin:5px 0"
-      onclick="
-        current.finished=false;
-        save();
-        closeModal();
-        render();
-      ">
+      onclick="resumeParty()">
 
       ↩️ Volver a editar fiesta
 
@@ -912,6 +1864,7 @@ function partyMenu(){
 
     <button
       class="danger"
+      type="button"
       style="width:100%;margin:5px 0"
       onclick="deleteParty()">
 
@@ -920,7 +1873,26 @@ function partyMenu(){
     </button>
 
   `);
+
 }
+
+
+function resumeParty(){
+
+  current.finished=false;
+
+  save();
+
+  closeModal();
+
+  render();
+
+}
+
+
+/* =========================
+   ELIMINAR FIESTA
+========================= */
 
 function deleteParty(){
 
@@ -932,68 +1904,123 @@ function deleteParty(){
 
       <button
         class="iconbtn"
+        type="button"
         onclick="closeModal()">
+
         ×
+
       </button>
 
     </div>
 
     <p>
-      Esta acción eliminará toda la fiesta y sus registros.
+
+      Esta acción eliminará toda
+      la fiesta y sus registros.
+
     </p>
 
     <button
       class="danger"
+      type="button"
       style="width:100%"
-      onclick="
-        state.parties=state.parties.filter(
-          p=>p.id!==current.id
-        );
-        save();
-        goHome();
-        closeModal();
-      ">
+      onclick="confirmDeleteParty()">
 
       Eliminar definitivamente
 
     </button>
 
   `);
+
 }
+
+
+function confirmDeleteParty(){
+
+  if(!current){
+    return;
+  }
+
+  state.parties=
+    state.parties.filter(
+      p=>p.id!==current.id
+    );
+
+  current=null;
+
+  save();
+
+  closeModal();
+
+  render();
+
+}
+
+
+/* =========================
+   MODALES
+========================= */
 
 function openModal(html){
 
-  document.getElementById("modal").innerHTML=html;
+  const modal=
+    document.getElementById("modal");
 
-  document
-    .getElementById("modalBg")
-    .classList.add("show");
+  const modalBg=
+    document.getElementById("modalBg");
 
-  setTimeout(
-    ()=>document.querySelector("#modal input")?.focus(),
-    50
-  );
+  modal.innerHTML=html;
+
+  modalBg.classList.add("show");
+
+  setTimeout(()=>{
+
+    const input=
+      modal.querySelector("input");
+
+    if(input){
+      input.focus();
+    }
+
+  },50);
+
 }
+
 
 function closeModal(){
 
   document
     .getElementById("modalBg")
     .classList.remove("show");
+
 }
+
+
+/* =========================
+   CERRAR MODAL TOCANDO FUERA
+========================= */
 
 document
   .getElementById("modalBg")
   .addEventListener(
     "click",
     e=>{
+
       if(e.target.id==="modalBg"){
         closeModal();
       }
+
     }
   );
 
+
+/* =========================
+   ARRANQUE
+========================= */
+
 render();
+
+startFirebase();
 
 </script>
 
