@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4c94f">
 <title>borrachos.com</title>
+
 <style>
 :root{
   --yellow:#f5c84b;
@@ -73,27 +74,24 @@ input{width:100%;border:0;outline:0;background:var(--pastel);padding:15px;border
 @media(max-width:390px){.options{grid-template-columns:1fr}.app{padding-left:12px;padding-right:12px}}
 </style>
 </head>
+
 <body>
-<div class="app"><div id="root" class="screen">
-  <div class="header">
-    <div><h1>🍻 borrachos.com</h1><div class="sub">Tus fiestas, tus cuentas.</div></div>
-    <button class="add">+</button>
-  </div>
-  <div class="card">
-    <h2>Mis fiestas</h2>
-    <div class="empty">Todavía no tienes fiestas.<br>Cuando abras la app, pulsa <b>+</b> para crear una.</div>
-  </div>
-</div></div>
 
-<div id="modalBg" class="modal-bg"><div class="modal" id="modal"></div></div>
+<div class="app">
+  <div id="root" class="screen"></div>
+</div>
 
-<script type="module">
-const KEY="copas_fiesta_v1";
-const defaultDrink={cups:["Calimocho","Vodka naranja","Ron cola","Glivery"],shots:["Plata o plomo","Tequila","Tequifresi"]};
-let state=JSON.parse(localStorage.getItem(KEY)||"null")||{parties:[],drinkOptions:defaultDrink};
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-  const firebaseConfig = {
+<div id="modalBg" class="modal-bg">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-database-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
   apiKey: "AIzaSyB1JbrYbUXyR17Mwhm-ISBwrqkB20lec4Y",
   authDomain: "borrachos-8a8d1.firebaseapp.com",
   databaseURL: "https://borrachos-8a8d1-default-rtdb.europe-west1.firebasedatabase.app",
@@ -103,130 +101,901 @@ let state=JSON.parse(localStorage.getItem(KEY)||"null")||{parties:[],drinkOption
   appId: "1:586341945009:web:cea538e985403fe7525c90"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-let current=null, tab="cups";
+firebase.initializeApp(firebaseConfig);
 
-function save(){set(ref(db,"partida"),state);
+const db = firebase.database();
+const partidaRef = db.ref("partida");
+
+const defaultDrink = {
+  cups:["Calimocho","Vodka naranja","Ron cola","Glivery"],
+  shots:["Plata o plomo","Tequila","Tequifresi"]
+};
+
+let state = {
+  parties:[],
+  drinkOptions:defaultDrink
+};
+
+let current = null;
+let tab = "cups";
+
+function save(){
+  partidaRef.set(state);
 }
-  onValue(ref(db,"partida"),(snapshot)=>{
-  const data=snapshot.val();
+
+partidaRef.on("value",snapshot=>{
+  const data = snapshot.val();
+
   if(data){
-    state=data;
+    state = data;
+
+    if(!state.parties) state.parties=[];
+    if(!state.drinkOptions) state.drinkOptions=defaultDrink;
+    if(!state.drinkOptions.cups) state.drinkOptions.cups=[];
+    if(!state.drinkOptions.shots) state.drinkOptions.shots=[];
+
+    if(current){
+      current = state.parties.find(p=>p.id===current.id) || null;
+    }
+
     render();
   }
 });
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function goHome(){current=null;render()}
-function party(id){current=state.parties.find(p=>p.id===id);tab="cups";render()}
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,m=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[m]));
+}
+
+function goHome(){
+  current=null;
+  render();
+}
+
+function party(id){
+  current=state.parties.find(p=>p.id===id);
+  tab="cups";
+  render();
+}
+
 function render(){
- const r=document.getElementById("root");
- if(!current) renderHome(r); else renderParty(r);
+  const r=document.getElementById("root");
+  if(!current) renderHome(r);
+  else renderParty(r);
 }
+
 function renderHome(r){
- r.innerHTML=`<div class="header"><div><h1>🍻 borrachos.com</h1><div class="sub">Tus fiestas, tus cuentas.</div></div><button class="add" onclick="newParty()">+</button></div>
- <div class="card"><h2>Mis fiestas</h2>${state.parties.length?state.parties.map(p=>`<div class="party" onclick="party('${p.id}')"><div class="party-info"><strong>${esc(p.name)}</strong><small>${new Date(p.createdAt).toLocaleDateString("es-ES")} · ${p.people.length} personas${p.finished?" · Finalizada":""}</small></div><span>›</span></div>`).join(""):`<div class="empty">Todavía no tienes fiestas.<br>Pulsa <b>+</b> para crear la primera.</div>`}</div>`;
+  r.innerHTML=`
+  <div class="header">
+    <div>
+      <h1>🍻 borrachos.com</h1>
+      <div class="sub">Tus fiestas, tus cuentas.</div>
+    </div>
+    <button class="add" onclick="newParty()">+</button>
+  </div>
+
+  <div class="card">
+    <h2>Mis fiestas</h2>
+
+    ${
+      state.parties.length
+      ?
+      state.parties.map(p=>`
+        <div class="party" onclick="party('${p.id}')">
+          <div class="party-info">
+            <strong>${esc(p.name)}</strong>
+            <small>
+              ${new Date(p.createdAt).toLocaleDateString("es-ES")}
+              · ${p.people.length} personas
+              ${p.finished?" · Finalizada":""}
+            </small>
+          </div>
+          <span>›</span>
+        </div>
+      `).join("")
+      :
+      `<div class="empty">
+        Todavía no tienes fiestas.<br>
+        Pulsa <b>+</b> para crear la primera.
+      </div>`
+    }
+
+  </div>`;
 }
+
 function newParty(){
- openModal(`<div class="modal-head"><h2>Nueva fiesta</h2><button class="iconbtn" onclick="closeModal()">×</button></div>
- <input id="partyName" placeholder="Ej. Navidad" autofocus><button class="primary" onclick="createParty()">Crear fiesta</button>`);
+  openModal(`
+    <div class="modal-head">
+      <h2>Nueva fiesta</h2>
+      <button class="iconbtn" onclick="closeModal()">×</button>
+    </div>
+
+    <input id="partyName" placeholder="Ej. Navidad" autofocus>
+
+    <button class="primary" onclick="createParty()">
+      Crear fiesta
+    </button>
+  `);
 }
+
 function createParty(){
- const name=document.getElementById("partyName").value.trim()||"Fiesta sin nombre";
- current={id:crypto.randomUUID(),name,createdAt:Date.now(),people:[],logs:[],finished:false};
- state.parties.unshift(current);save();closeModal();render();
-}
-function renderParty(r){
- const people=current.people;
- r.innerHTML=`<div class="header"><button class="back" onclick="goHome()">‹</button><div style="text-align:center"><h1>${esc(current.name)}</h1><div class="sub">${current.finished?"Fiesta finalizada":"Fiesta en curso"}</div></div><button class="iconbtn" onclick="partyMenu()">⋯</button></div>
- <div class="card"><div class="section-title"><h2>Personas</h2><button class="secondary" onclick="addPerson()">+ Añadir</button></div>
- <div class="people">${people.length?people.map(x=>`<div class="person">${esc(x.name)} <button onclick="removePerson('${x.id}');event.stopPropagation()">×</button></div>`).join(""):`<div class="sub">Añade a las personas que están en la fiesta.</div>`}</div></div>
- ${current.finished?resultsHTML():trackerHTML()}
- <div class="notice">Todo lo que añadas se puede eliminar si te equivocas.</div>`;
-}
-function trackerHTML(){
- if(!current.people.length)return `<div class="card empty">Añade al menos una persona para empezar a registrar copas y chupitos.</div>`;
- return `<div class="card"><div class="tabs"><button class="tab ${tab==="cups"?"active":""}" onclick="tab='cups';render()">🍹 Copas</button><button class="tab ${tab==="shots"?"active":""}" onclick="tab='shots';render()">🥃 Chupitos</button></div>
- <div class="section-title"><h2>${tab==="cups"?"Elige una copa":"Elige un chupito"}</h2><button class="secondary" onclick="addOption('${tab}')">+ Añadir opción</button></div>
- <div class="options">${state.drinkOptions[tab].map(o=>`<button class="option" onclick="chooseDrink('${encodeURIComponent(o)}')">${esc(o)}<small>Toca para registrar</small></button>`).join("")}</div>
- <div style="margin-top:20px"><h2>Contador</h2>${current.people.map(personRow).join("")}</div>
- <button class="primary" onclick="finishParty()">🏁 Finalizar fiesta</button></div>`;
-}
-function personRow(p){
- const logs=current.logs.filter(l=>l.personId===p.id);
- const cups=logs.filter(l=>l.kind==="cups").length, shots=logs.filter(l=>l.kind==="shots").length;
- return `<div class="person-row"><div class="person-head"><strong>${esc(p.name)}</strong><div class="counts"><span class="pill">🍹 ${cups}</span><span class="pill">🥃 ${shots}</span></div></div>
- ${logs.length?`<div class="history">${logs.slice().reverse().slice(0,6).map(l=>`<div class="log"><span>${l.kind==="cups"?"🍹":"🥃"} ${esc(l.drink)} · ${new Date(l.time).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}</span><button onclick="removeLog('${l.id}')">Quitar</button></div>`).join("")}</div>`:""}</div>`;
-}
-function chooseDrink(enc){
- const drink=decodeURIComponent(enc);
- openModal(`<div class="modal-head"><h2>${tab==="cups"?"🍹 Copa":"🥃 Chupito"}</h2><button class="iconbtn" onclick="closeModal()">×</button></div>
- <p><b>${esc(drink)}</b><br><span class="sub">¿Quién lo ha tomado?</span></p>
- ${current.people.map(p=>`<button class="option" style="width:100%;margin:5px 0" onclick="addLog('${p.id}','${encodeURIComponent(drink)}')">${esc(p.name)}</button>`).join("")}`);
-}
-function addLog(personId,enc){
- current.logs.push({id:crypto.randomUUID(),personId,kind:tab,drink:decodeURIComponent(enc),time:Date.now()});
- save();closeModal();render();
-}
-function removeLog(id){current.logs=current.logs.filter(l=>l.id!==id);save();render()}
-function addPerson(){
- openModal(`<div class="modal-head"><h2>Añadir persona</h2><button class="iconbtn" onclick="closeModal()">×</button></div><input id="personName" placeholder="Nombre"><button class="primary" onclick="createPerson()">Añadir</button>`);
-}
-function createPerson(){
- const name=document.getElementById("personName").value.trim();if(!name)return;
- current.people.push({id:crypto.randomUUID(),name});save();closeModal();render();
-}
-function removePerson(id){
- const p=current.people.find(x=>x.id===id);
- openModal(`<div class="modal-head"><h2>Quitar persona</h2><button class="iconbtn" onclick="closeModal()">×</button></div><p>¿Quitar a <b>${esc(p.name)}</b>? Sus registros también se eliminarán.</p><button class="danger" style="width:100%" onclick="confirmRemovePerson('${id}')">Sí, quitar</button>`);
-}
-function confirmRemovePerson(id){current.people=current.people.filter(p=>p.id!==id);current.logs=current.logs.filter(l=>l.personId!==id);save();closeModal();render()}
-function addOption(kind){
- openModal(`<div class="modal-head"><h2>Añadir ${kind==="cups"?"copa":"chupito"}</h2><button class="iconbtn" onclick="closeModal()">×</button></div><input id="optionName" placeholder="Ej. Whisky cola"><button class="primary" onclick="createOption('${kind}')">Añadir opción</button>`);
-}
-function createOption(kind){
- const n=document.getElementById("optionName").value.trim();if(!n)return;
- if(!state.drinkOptions[kind].includes(n))state.drinkOptions[kind].push(n);save();closeModal();render();
-}
-function finishParty(){
- openModal(`<div class="modal-head"><h2>¿Finalizar fiesta?</h2><button class="iconbtn" onclick="closeModal()">×</button></div><p>Podrás consultar las gráficas y la clasificación. Los registros quedarán guardados.</p><button class="primary" onclick="current.finished=true;save();closeModal();render()">🏁 Sí, finalizar</button>`);
-}
-function resultsHTML(){
- const totals=current.people.map(p=>({p,c:current.logs.filter(l=>l.personId===p.id&&l.kind==="cups").length,s:current.logs.filter(l=>l.personId===p.id&&l.kind==="shots").length}));
- const max=Math.max(1,...totals.map(x=>x.c+x.s));
- const sorted=[...totals].sort((a,b)=>(b.c+b.s)-(a.c+a.s));
- return `<div class="card"><h2>📊 Resultados</h2><p class="sub">Copas + chupitos registrados durante la fiesta.</p>${totals.map(x=>`<div class="chartbar"><div class="chartlabel"><span>${esc(x.p.name)}</span><span>${x.c+x.s} total</span></div><div class="barbg"><div class="bar" style="width:${(x.c+x.s)/max*100}%"></div></div><div class="sub">🍹 ${x.c} copas · 🥃 ${x.s} chupitos</div></div>`).join("")}</div>
- <div class="card"><h2>🏆 Clasificación</h2>${sorted.map((x,i)=>`<div class="rank"><div class="ranknum">${i+1}.</div><strong>${esc(x.p.name)}</strong><div class="total">${x.c+x.s}</div></div>`).join("")}</div>
- <div class="card"><h2>🕒 Registro</h2>${current.logs.slice().sort((a,b)=>b.time-a.time).map(l=>{let p=current.people.find(x=>x.id===l.personId);return `<div class="log"><span>${esc(p?.name||"")} · ${l.kind==="cups"?"🍹":"🥃"} ${esc(l.drink)}</span><span>${new Date(l.time).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}</span></div>`}).join("")||`<div class="empty">No hay registros.</div>`}</div>`;
-}
-function partyMenu(){
- openModal(`<div class="modal-head"><h2>Opciones</h2><button class="iconbtn" onclick="closeModal()">×</button></div>
- <button class="secondary" style="width:100%;margin:5px 0" onclick="current.finished=false;save();closeModal();render()">↩️ Volver a editar fiesta</button>
- <button class="danger" style="width:100%;margin:5px 0" onclick="deleteParty()">🗑️ Eliminar fiesta</button>`);
-}
-function deleteParty(){
- openModal(`<div class="modal-head"><h2>Eliminar fiesta</h2><button class="iconbtn" onclick="closeModal()">×</button></div><p>Esta acción eliminará toda la fiesta y sus registros.</p><button class="danger" style="width:100%" onclick="state.parties=state.parties.filter(p=>p.id!==current.id);save();goHome();closeModal()">Eliminar definitivamente</button>`);
-}
-function openModal(html){document.getElementById("modal").innerHTML=html;document.getElementById("modalBg").classList.add("show");setTimeout(()=>document.querySelector("#modal input")?.focus(),50)}
-function closeModal(){document.getElementById("modalBg").classList.remove("show")}
-document.getElementById("modalBg").addEventListener("click",e=>{if(e.target.id==="modalBg")closeModal()});
-render();
-</script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1JbrYbUXyR17Mwhm-ISBwrqkB20lec4Y",
-    authDomain: "borrachos-8a8d1.firebaseapp.com",
-    databaseURL: "https://borrachos-8a8d1-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "borrachos-8a8d1",
-    storageBucket: "borrachos-8a8d1.firebasestorage.app",
-    messagingSenderId: "586341945009",
-    appId: "1:586341945009:web:cea538e985403fe7525c90"
+
+  const name =
+    document.getElementById("partyName").value.trim()
+    || "Fiesta sin nombre";
+
+  current={
+    id:crypto.randomUUID(),
+    name,
+    createdAt:Date.now(),
+    people:[],
+    logs:[],
+    finished:false
   };
 
-  const app = initializeApp(firebaseConfig);
+  state.parties.unshift(current);
+
+  save();
+  closeModal();
+  render();
+}
+
+function renderParty(r){
+
+  const people=current.people;
+
+  r.innerHTML=`
+  <div class="header">
+
+    <button class="back" onclick="goHome()">‹</button>
+
+    <div style="text-align:center">
+      <h1>${esc(current.name)}</h1>
+      <div class="sub">
+        ${current.finished?"Fiesta finalizada":"Fiesta en curso"}
+      </div>
+    </div>
+
+    <button class="iconbtn" onclick="partyMenu()">⋯</button>
+
+  </div>
+
+  <div class="card">
+
+    <div class="section-title">
+      <h2>Personas</h2>
+
+      <button class="secondary" onclick="addPerson()">
+        + Añadir
+      </button>
+    </div>
+
+    <div class="people">
+
+      ${
+        people.length
+        ?
+        people.map(x=>`
+          <div class="person">
+            ${esc(x.name)}
+
+            <button
+              onclick="removePerson('${x.id}');event.stopPropagation()">
+              ×
+            </button>
+
+          </div>
+        `).join("")
+        :
+        `<div class="sub">
+          Añade a las personas que están en la fiesta.
+        </div>`
+      }
+
+    </div>
+
+  </div>
+
+  ${current.finished ? resultsHTML() : trackerHTML()}
+
+  <div class="notice">
+    Todo lo que añadas se puede eliminar si te equivocas.
+  </div>
+  `;
+}
+
+function trackerHTML(){
+
+  if(!current.people.length){
+
+    return `
+    <div class="card empty">
+      Añade al menos una persona para empezar a registrar
+      copas y chupitos.
+    </div>
+    `;
+  }
+
+  return `
+  <div class="card">
+
+    <div class="tabs">
+
+      <button
+        class="tab ${tab==="cups"?"active":""}"
+        onclick="tab='cups';render()">
+        🍹 Copas
+      </button>
+
+      <button
+        class="tab ${tab==="shots"?"active":""}"
+        onclick="tab='shots';render()">
+        🥃 Chupitos
+      </button>
+
+    </div>
+
+    <div class="section-title">
+
+      <h2>
+        ${tab==="cups"?"Elige una copa":"Elige un chupito"}
+      </h2>
+
+      <button
+        class="secondary"
+        onclick="addOption('${tab}')">
+        + Añadir opción
+      </button>
+
+    </div>
+
+    <div class="options">
+
+      ${state.drinkOptions[tab].map(o=>`
+
+        <button
+          class="option"
+          onclick="chooseDrink('${encodeURIComponent(o)}')">
+
+          ${esc(o)}
+
+          <small>
+            Toca para registrar
+          </small>
+
+        </button>
+
+      `).join("")}
+
+    </div>
+
+    <div style="margin-top:20px">
+
+      <h2>Contador</h2>
+
+      ${current.people.map(personRow).join("")}
+
+    </div>
+
+    <button
+      class="primary"
+      onclick="finishParty()">
+      🏁 Finalizar fiesta
+    </button>
+
+  </div>
+  `;
+}
+
+function personRow(p){
+
+  const logs=current.logs.filter(
+    l=>l.personId===p.id
+  );
+
+  const cups=logs.filter(
+    l=>l.kind==="cups"
+  ).length;
+
+  const shots=logs.filter(
+    l=>l.kind==="shots"
+  ).length;
+
+  return `
+  <div class="person-row">
+
+    <div class="person-head">
+
+      <strong>${esc(p.name)}</strong>
+
+      <div class="counts">
+
+        <span class="pill">
+          🍹 ${cups}
+        </span>
+
+        <span class="pill">
+          🥃 ${shots}
+        </span>
+
+      </div>
+
+    </div>
+
+    ${
+      logs.length
+      ?
+      `
+      <div class="history">
+
+        ${
+          logs
+          .slice()
+          .reverse()
+          .slice(0,6)
+          .map(l=>`
+
+            <div class="log">
+
+              <span>
+                ${l.kind==="cups"?"🍹":"🥃"}
+                ${esc(l.drink)}
+                ·
+                ${new Date(l.time).toLocaleTimeString(
+                  "es-ES",
+                  {hour:"2-digit",minute:"2-digit"}
+                )}
+              </span>
+
+              <button onclick="removeLog('${l.id}')">
+                Quitar
+              </button>
+
+            </div>
+
+          `).join("")
+        }
+
+      </div>
+      `
+      :
+      ""
+    }
+
+  </div>
+  `;
+}
+
+function chooseDrink(enc){
+
+  const drink=decodeURIComponent(enc);
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>
+        ${tab==="cups"?"🍹 Copa":"🥃 Chupito"}
+      </h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <p>
+      <b>${esc(drink)}</b><br>
+      <span class="sub">
+        ¿Quién lo ha tomado?
+      </span>
+    </p>
+
+    ${
+      current.people.map(p=>`
+
+        <button
+          class="option"
+          style="width:100%;margin:5px 0"
+          onclick="addLog(
+            '${p.id}',
+            '${encodeURIComponent(drink)}'
+          )">
+
+          ${esc(p.name)}
+
+        </button>
+
+      `).join("")
+    }
+
+  `);
+}
+
+function addLog(personId,enc){
+
+  current.logs.push({
+
+    id:crypto.randomUUID(),
+    personId,
+    kind:tab,
+    drink:decodeURIComponent(enc),
+    time:Date.now()
+
+  });
+
+  save();
+  closeModal();
+  render();
+}
+
+function removeLog(id){
+
+  current.logs=current.logs.filter(
+    l=>l.id!==id
+  );
+
+  save();
+  render();
+}
+
+function addPerson(){
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>Añadir persona</h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <input
+      id="personName"
+      placeholder="Nombre">
+
+    <button
+      class="primary"
+      onclick="createPerson()">
+      Añadir
+    </button>
+
+  `);
+}
+
+function createPerson(){
+
+  const name=
+    document.getElementById("personName")
+    .value.trim();
+
+  if(!name)return;
+
+  current.people.push({
+    id:crypto.randomUUID(),
+    name
+  });
+
+  save();
+  closeModal();
+  render();
+}
+
+function removePerson(id){
+
+  const p=current.people.find(
+    x=>x.id===id
+  );
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>Quitar persona</h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <p>
+      ¿Quitar a <b>${esc(p.name)}</b>?
+      Sus registros también se eliminarán.
+    </p>
+
+    <button
+      class="danger"
+      style="width:100%"
+      onclick="confirmRemovePerson('${id}')">
+
+      Sí, quitar
+
+    </button>
+
+  `);
+}
+
+function confirmRemovePerson(id){
+
+  current.people=current.people.filter(
+    p=>p.id!==id
+  );
+
+  current.logs=current.logs.filter(
+    l=>l.personId!==id
+  );
+
+  save();
+  closeModal();
+  render();
+}
+
+function addOption(kind){
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>
+        Añadir ${kind==="cups"?"copa":"chupito"}
+      </h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <input
+      id="optionName"
+      placeholder="Ej. Whisky cola">
+
+    <button
+      class="primary"
+      onclick="createOption('${kind}')">
+
+      Añadir opción
+
+    </button>
+
+  `);
+}
+
+function createOption(kind){
+
+  const n=
+    document.getElementById("optionName")
+    .value.trim();
+
+  if(!n)return;
+
+  if(!state.drinkOptions[kind].includes(n)){
+    state.drinkOptions[kind].push(n);
+  }
+
+  save();
+  closeModal();
+  render();
+}
+
+function finishParty(){
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>¿Finalizar fiesta?</h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <p>
+      Podrás consultar las gráficas y la clasificación.
+      Los registros quedarán guardados.
+    </p>
+
+    <button
+      class="primary"
+      onclick="
+        current.finished=true;
+        save();
+        closeModal();
+        render();
+      ">
+
+      🏁 Sí, finalizar
+
+    </button>
+
+  `);
+}
+
+function resultsHTML(){
+
+  const totals=current.people.map(p=>({
+
+    p,
+
+    c:current.logs.filter(
+      l=>l.personId===p.id && l.kind==="cups"
+    ).length,
+
+    s:current.logs.filter(
+      l=>l.personId===p.id && l.kind==="shots"
+    ).length
+
+  }));
+
+  const max=Math.max(
+    1,
+    ...totals.map(x=>x.c+x.s)
+  );
+
+  const sorted=[
+    ...totals
+  ].sort(
+    (a,b)=>(b.c+b.s)-(a.c+a.s)
+  );
+
+  return `
+
+  <div class="card">
+
+    <h2>📊 Resultados</h2>
+
+    <p class="sub">
+      Copas + chupitos registrados durante la fiesta.
+    </p>
+
+    ${
+      totals.map(x=>`
+
+        <div class="chartbar">
+
+          <div class="chartlabel">
+
+            <span>
+              ${esc(x.p.name)}
+            </span>
+
+            <span>
+              ${x.c+x.s} total
+            </span>
+
+          </div>
+
+          <div class="barbg">
+
+            <div
+              class="bar"
+              style="width:${(x.c+x.s)/max*100}%">
+            </div>
+
+          </div>
+
+          <div class="sub">
+            🍹 ${x.c} copas · 🥃 ${x.s} chupitos
+          </div>
+
+        </div>
+
+      `).join("")
+    }
+
+  </div>
+
+  <div class="card">
+
+    <h2>🏆 Clasificación</h2>
+
+    ${
+      sorted.map((x,i)=>`
+
+        <div class="rank">
+
+          <div class="ranknum">
+            ${i+1}.
+          </div>
+
+          <strong>
+            ${esc(x.p.name)}
+          </strong>
+
+          <div class="total">
+            ${x.c+x.s}
+          </div>
+
+        </div>
+
+      `).join("")
+    }
+
+  </div>
+
+  <div class="card">
+
+    <h2>🕒 Registro</h2>
+
+    ${
+      current.logs
+      .slice()
+      .sort((a,b)=>b.time-a.time)
+      .map(l=>{
+
+        let p=current.people.find(
+          x=>x.id===l.personId
+        );
+
+        return `
+
+          <div class="log">
+
+            <span>
+              ${esc(p?.name||"")}
+              ·
+              ${l.kind==="cups"?"🍹":"🥃"}
+              ${esc(l.drink)}
+            </span>
+
+            <span>
+              ${new Date(l.time).toLocaleTimeString(
+                "es-ES",
+                {hour:"2-digit",minute:"2-digit"}
+              )}
+            </span>
+
+          </div>
+
+        `;
+
+      }).join("")
+      ||
+      `<div class="empty">No hay registros.</div>`
+    }
+
+  </div>
+
+  `;
+}
+
+function partyMenu(){
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>Opciones</h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <button
+      class="secondary"
+      style="width:100%;margin:5px 0"
+      onclick="
+        current.finished=false;
+        save();
+        closeModal();
+        render();
+      ">
+
+      ↩️ Volver a editar fiesta
+
+    </button>
+
+    <button
+      class="danger"
+      style="width:100%;margin:5px 0"
+      onclick="deleteParty()">
+
+      🗑️ Eliminar fiesta
+
+    </button>
+
+  `);
+}
+
+function deleteParty(){
+
+  openModal(`
+
+    <div class="modal-head">
+
+      <h2>Eliminar fiesta</h2>
+
+      <button
+        class="iconbtn"
+        onclick="closeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <p>
+      Esta acción eliminará toda la fiesta y sus registros.
+    </p>
+
+    <button
+      class="danger"
+      style="width:100%"
+      onclick="
+        state.parties=state.parties.filter(
+          p=>p.id!==current.id
+        );
+        save();
+        goHome();
+        closeModal();
+      ">
+
+      Eliminar definitivamente
+
+    </button>
+
+  `);
+}
+
+function openModal(html){
+
+  document.getElementById("modal").innerHTML=html;
+
+  document
+    .getElementById("modalBg")
+    .classList.add("show");
+
+  setTimeout(
+    ()=>document.querySelector("#modal input")?.focus(),
+    50
+  );
+}
+
+function closeModal(){
+
+  document
+    .getElementById("modalBg")
+    .classList.remove("show");
+}
+
+document
+  .getElementById("modalBg")
+  .addEventListener(
+    "click",
+    e=>{
+      if(e.target.id==="modalBg"){
+        closeModal();
+      }
+    }
+  );
+
+render();
 
 </script>
+
 </body>
 </html>
