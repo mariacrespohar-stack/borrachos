@@ -87,13 +87,35 @@ input{width:100%;border:0;outline:0;background:var(--pastel);padding:15px;border
 
 <div id="modalBg" class="modal-bg"><div class="modal" id="modal"></div></div>
 
-<script>
+<script type="module">
 const KEY="copas_fiesta_v1";
 const defaultDrink={cups:["Calimocho","Vodka naranja","Ron cola","Glivery"],shots:["Plata o plomo","Tequila","Tequifresi"]};
 let state=JSON.parse(localStorage.getItem(KEY)||"null")||{parties:[],drinkOptions:defaultDrink};
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+  const firebaseConfig = {
+  apiKey: "AIzaSyB1JbrYbUXyR17Mwhm-ISBwrqkB20lec4Y",
+  authDomain: "borrachos-8a8d1.firebaseapp.com",
+  databaseURL: "https://borrachos-8a8d1-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "borrachos-8a8d1",
+  storageBucket: "borrachos-8a8d1.firebasestorage.app",
+  messagingSenderId: "586341945009",
+  appId: "1:586341945009:web:cea538e985403fe7525c90"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 let current=null, tab="cups";
 
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){set(ref(db,"partida"),state);
+}
+  onValue(ref(db,"partida"),(snapshot)=>{
+  const data=snapshot.val();
+  if(data){
+    state=data;
+    render();
+  }
+});
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function goHome(){current=null;render()}
 function party(id){current=state.parties.find(p=>p.id===id);tab="cups";render()}
@@ -189,6 +211,22 @@ function openModal(html){document.getElementById("modal").innerHTML=html;documen
 function closeModal(){document.getElementById("modalBg").classList.remove("show")}
 document.getElementById("modalBg").addEventListener("click",e=>{if(e.target.id==="modalBg")closeModal()});
 render();
+</script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyB1JbrYbUXyR17Mwhm-ISBwrqkB20lec4Y",
+    authDomain: "borrachos-8a8d1.firebaseapp.com",
+    databaseURL: "https://borrachos-8a8d1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "borrachos-8a8d1",
+    storageBucket: "borrachos-8a8d1.firebasestorage.app",
+    messagingSenderId: "586341945009",
+    appId: "1:586341945009:web:cea538e985403fe7525c90"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
 </script>
 </body>
 </html>
