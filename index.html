@@ -14,7 +14,6 @@
   --pastel:#fff0ae;
   --pastel2:#ffe69a;
   --text:#594714;
-  --white:#fffdf5;
   --danger:#e66b55;
   --shadow:0 8px 22px rgba(108,79,7,.12);
 }
@@ -64,10 +63,6 @@ h1{
 h2{
   font-size:23px;
   margin:0 0 14px;
-}
-
-h3{
-  margin:0 0 8px;
 }
 
 .sub{
@@ -411,7 +406,6 @@ input{
   <div class="modal" id="modal"></div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-database-compat.js"></script>
 
@@ -440,7 +434,7 @@ let state = {
   }
 };
 
-let current = null;
+let currentId = null;
 let tab = "cups";
 
 let db = null;
@@ -464,9 +458,23 @@ function makeId(){
   return "id-" +
     Date.now().toString(36) +
     "-" +
-    Math.random().toString(36).slice(2) +
-    "-" +
     Math.random().toString(36).slice(2);
+}
+
+
+/* =========================
+   OBTENER FIESTA ACTUAL
+========================= */
+
+function getCurrent(){
+
+  if(!currentId){
+    return null;
+  }
+
+  return state.parties.find(
+    p=>p.id===currentId
+  ) || null;
 }
 
 
@@ -479,7 +487,6 @@ function startFirebase(){
   try{
 
     if(!window.firebase){
-      console.warn("Firebase no está cargado.");
       return;
     }
 
@@ -492,72 +499,59 @@ function startFirebase(){
 
     firebaseReady=true;
 
-    partidaRef.on(
-      "value",
-      snapshot=>{
+    partidaRef.on("value",snapshot=>{
 
-        const data=snapshot.val();
+      const data=snapshot.val();
 
-        if(data){
+      if(data){
 
-          state=data;
+        state=data;
 
-          if(!Array.isArray(state.parties)){
-            state.parties=[];
-          }
-
-          if(!state.drinkOptions){
-            state.drinkOptions={
-              cups:[...defaultDrink.cups],
-              shots:[...defaultDrink.shots]
-            };
-          }
-
-          if(!Array.isArray(state.drinkOptions.cups)){
-            state.drinkOptions.cups=[];
-          }
-
-          if(!Array.isArray(state.drinkOptions.shots)){
-            state.drinkOptions.shots=[];
-          }
-
-          if(current){
-
-            current=
-              state.parties.find(
-                p=>p.id===current.id
-              ) || null;
-
-          }
-
+        if(!Array.isArray(state.parties)){
+          state.parties=[];
         }
 
-        render();
+        if(!state.drinkOptions){
+          state.drinkOptions={
+            cups:[...defaultDrink.cups],
+            shots:[...defaultDrink.shots]
+          };
+        }
 
-      },
-      error=>{
+        if(!Array.isArray(state.drinkOptions.cups)){
+          state.drinkOptions.cups=[];
+        }
 
-        console.warn(
-          "Firebase no disponible:",
-          error
-        );
+        if(!Array.isArray(state.drinkOptions.shots)){
+          state.drinkOptions.shots=[];
+        }
 
-        firebaseReady=false;
+        state.parties.forEach(p=>{
 
-        render();
+          if(!Array.isArray(p.people)){
+            p.people=[];
+          }
+
+          if(!Array.isArray(p.logs)){
+            p.logs=[];
+          }
+
+          if(typeof p.finished!=="boolean"){
+            p.finished=false;
+          }
+
+        });
 
       }
-    );
+
+      render();
+
+    });
 
   }catch(error){
 
-    console.warn(
-      "Error iniciando Firebase:",
-      error
-    );
-
+    console.log(error);
     firebaseReady=false;
-
     render();
 
   }
@@ -575,16 +569,19 @@ function save(){
     return;
   }
 
-  partidaRef
-    .set(state)
-    .catch(error=>{
+  /*
+    Guardamos una copia del estado.
+    Así evitamos que una referencia antigua
+    pueda sobrescribir los cambios nuevos.
+  */
 
-      console.warn(
-        "No se pudo guardar:",
-        error
-      );
+  const copy=JSON.parse(
+    JSON.stringify(state)
+  );
 
-    });
+  partidaRef.set(copy).catch(error=>{
+    console.log("Error guardando:",error);
+  });
 
 }
 
@@ -615,40 +612,50 @@ function esc(s){
 
 function goHome(){
 
-  current=null;
+  currentId=null;
+
+  closeModal();
+
   render();
 
 }
 
+
 function party(id){
 
-  current=
-    state.parties.find(
-      p=>p.id===id
-    ) || null;
+  const exists=state.parties.some(
+    p=>p.id===id
+  );
 
+  if(!exists){
+    return;
+  }
+
+  currentId=id;
   tab="cups";
 
   render();
 
 }
 
+
 function render(){
 
-  const r=
-    document.getElementById("root");
+  const r=document.getElementById("root");
+
+  const current=getCurrent();
 
   if(!current){
     renderHome(r);
   }else{
-    renderParty(r);
+    renderParty(r,current);
   }
 
 }
 
 
 /* =========================
-   PANTALLA PRINCIPAL
+   HOME
 ========================= */
 
 function renderHome(r){
@@ -707,13 +714,12 @@ function renderHome(r){
 
                 ·
 
-                ${p.people.length}
-                personas
+                ${p.people.length} personas
 
                 ${
                   p.finished
-                  ?" · Finalizada"
-                  :""
+                  ? " · Finalizada"
+                  : ""
                 }
 
               </small>
@@ -731,7 +737,6 @@ function renderHome(r){
         `<div class="empty">
 
           Todavía no tienes fiestas.<br>
-
           Pulsa <b>+</b> para crear la primera.
 
         </div>`
@@ -768,7 +773,6 @@ function newParty(){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -784,7 +788,6 @@ function newParty(){
 
     <button
       class="primary"
-      type="button"
       onclick="createParty()">
 
       Crear fiesta
@@ -796,17 +799,11 @@ function newParty(){
 }
 
 
-/* =========================
-   CREAR FIESTA
-========================= */
-
 function createParty(){
 
-  const input=
-    document.getElementById("partyName");
+  const input=document.getElementById("partyName");
 
-  const name=
-    input
+  const name=input
     ? input.value.trim()
     : "";
 
@@ -814,9 +811,7 @@ function createParty(){
 
     id:makeId(),
 
-    name:
-      name ||
-      "Fiesta sin nombre",
+    name:name || "Fiesta sin nombre",
 
     createdAt:Date.now(),
 
@@ -830,7 +825,13 @@ function createParty(){
 
   state.parties.unshift(p);
 
-  current=p;
+  /*
+    IMPORTANTE:
+    Guardamos primero el estado completo
+    y después abrimos la fiesta por ID.
+  */
+
+  currentId=p.id;
 
   save();
 
@@ -842,10 +843,10 @@ function createParty(){
 
 
 /* =========================
-   PANTALLA DE FIESTA
+   FIESTA
 ========================= */
 
-function renderParty(r){
+function renderParty(r,current){
 
   if(!Array.isArray(current.people)){
     current.people=[];
@@ -861,7 +862,6 @@ function renderParty(r){
 
       <button
         class="back"
-        type="button"
         onclick="goHome()">
 
         ‹
@@ -878,8 +878,8 @@ function renderParty(r){
 
           ${
             current.finished
-            ?"Fiesta finalizada"
-            :"Fiesta en curso"
+            ? "Fiesta finalizada"
+            : "Fiesta en curso"
           }
 
         </div>
@@ -888,7 +888,6 @@ function renderParty(r){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="partyMenu()">
 
         ⋯
@@ -903,14 +902,20 @@ function renderParty(r){
 
         <h2>Personas</h2>
 
-        <button
-          class="secondary"
-          type="button"
-          onclick="addPerson()">
+        ${
+          current.finished
+          ? ""
+          :
+          `
+          <button
+            class="secondary"
+            onclick="addPerson()">
 
-          + Añadir
+            + Añadir
 
-        </button>
+          </button>
+          `
+        }
 
       </div>
 
@@ -927,16 +932,22 @@ function renderParty(r){
 
               ${esc(x.name)}
 
-              <button
-                type="button"
-                onclick="
-                  removePerson('${x.id}');
-                  event.stopPropagation();
-                ">
+              ${
+                current.finished
+                ? ""
+                :
+                `
+                <button
+                  onclick="
+                    removePerson('${x.id}');
+                    event.stopPropagation();
+                  ">
 
-                ×
+                  ×
 
-              </button>
+                </button>
+                `
+              }
 
             </div>
 
@@ -945,10 +956,7 @@ function renderParty(r){
           :
 
           `<div class="sub">
-
-            Añade a las personas que
-            están en la fiesta.
-
+            No hay personas añadidas.
           </div>`
         }
 
@@ -958,14 +966,13 @@ function renderParty(r){
 
     ${
       current.finished
-      ? resultsHTML()
-      : trackerHTML()
+      ? resultsHTML(current)
+      : trackerHTML(current)
     }
 
     <div class="notice">
 
-      Todo lo que añadas se puede eliminar
-      si te equivocas.
+      Todo lo que añadas se guarda automáticamente.
 
     </div>
 
@@ -975,10 +982,10 @@ function renderParty(r){
 
 
 /* =========================
-   REGISTRO
+   TRACKER
 ========================= */
 
-function trackerHTML(){
+function trackerHTML(current){
 
   if(!current.people.length){
 
@@ -1004,7 +1011,6 @@ function trackerHTML(){
 
         <button
           class="tab ${tab==="cups"?"active":""}"
-          type="button"
           onclick="tab='cups';render()">
 
           🍹 Copas
@@ -1013,7 +1019,6 @@ function trackerHTML(){
 
         <button
           class="tab ${tab==="shots"?"active":""}"
-          type="button"
           onclick="tab='shots';render()">
 
           🥃 Chupitos
@@ -1028,15 +1033,14 @@ function trackerHTML(){
 
           ${
             tab==="cups"
-            ?"Elige una copa"
-            :"Elige un chupito"
+            ? "Elige una copa"
+            : "Elige un chupito"
           }
 
         </h2>
 
         <button
           class="secondary"
-          type="button"
           onclick="addOption('${tab}')">
 
           + Añadir opción
@@ -1052,7 +1056,6 @@ function trackerHTML(){
 
             <button
               class="option"
-              type="button"
               onclick="
                 chooseDrink(
                   '${encodeURIComponent(o)}'
@@ -1082,7 +1085,6 @@ function trackerHTML(){
 
       <button
         class="primary"
-        type="button"
         onclick="finishParty()">
 
         🏁 Finalizar fiesta
@@ -1097,25 +1099,28 @@ function trackerHTML(){
 
 
 /* =========================
-   FILA PERSONA
+   PERSONA
 ========================= */
 
 function personRow(p){
 
-  const logs=
-    current.logs.filter(
-      l=>l.personId===p.id
-    );
+  const current=getCurrent();
 
-  const cups=
-    logs.filter(
-      l=>l.kind==="cups"
-    ).length;
+  if(!current){
+    return "";
+  }
 
-  const shots=
-    logs.filter(
-      l=>l.kind==="shots"
-    ).length;
+  const logs=current.logs.filter(
+    l=>l.personId===p.id
+  );
+
+  const cups=logs.filter(
+    l=>l.kind==="cups"
+  ).length;
+
+  const shots=logs.filter(
+    l=>l.kind==="shots"
+  ).length;
 
   return `
 
@@ -1143,10 +1148,9 @@ function personRow(p){
 
       ${
         logs.length
-
         ?
-
-        `<div class="history">
+        `
+        <div class="history">
 
           ${
             logs
@@ -1159,11 +1163,7 @@ function personRow(p){
 
                 <span>
 
-                  ${
-                    l.kind==="cups"
-                    ?"🍹"
-                    :"🥃"
-                  }
+                  ${l.kind==="cups"?"🍹":"🥃"}
 
                   ${esc(l.drink)}
 
@@ -1182,7 +1182,6 @@ function personRow(p){
                 </span>
 
                 <button
-                  type="button"
                   onclick="removeLog('${l.id}')">
 
                   Quitar
@@ -1194,10 +1193,9 @@ function personRow(p){
             `).join("")
           }
 
-        </div>`
-
+        </div>
+        `
         :
-
         ""
       }
 
@@ -1209,31 +1207,29 @@ function personRow(p){
 
 
 /* =========================
-   ELEGIR COPA / CHUPITO
+   ELEGIR BEBIDA
 ========================= */
 
 function chooseDrink(enc){
 
-  const drink=
-    decodeURIComponent(enc);
+  const drink=decodeURIComponent(enc);
+
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
 
   openModal(`
 
     <div class="modal-head">
 
       <h2>
-
-        ${
-          tab==="cups"
-          ?"🍹 Copa"
-          :"🥃 Chupito"
-        }
-
+        ${tab==="cups"?"🍹 Copa":"🥃 Chupito"}
       </h2>
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1257,7 +1253,6 @@ function chooseDrink(enc){
 
         <button
           class="option"
-          type="button"
           style="width:100%;margin:5px 0"
           onclick="
             addLog(
@@ -1283,6 +1278,12 @@ function chooseDrink(enc){
 ========================= */
 
 function addLog(personId,enc){
+
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
 
   current.logs.push({
 
@@ -1313,10 +1314,15 @@ function addLog(personId,enc){
 
 function removeLog(id){
 
-  current.logs=
-    current.logs.filter(
-      l=>l.id!==id
-    );
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
+
+  current.logs=current.logs.filter(
+    l=>l.id!==id
+  );
 
   save();
 
@@ -1339,7 +1345,6 @@ function addPerson(){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1355,7 +1360,6 @@ function addPerson(){
 
     <button
       class="primary"
-      type="button"
       onclick="createPerson()">
 
       Añadir
@@ -1367,17 +1371,17 @@ function addPerson(){
 }
 
 
-/* =========================
-   CREAR PERSONA
-========================= */
-
 function createPerson(){
 
-  const input=
-    document.getElementById("personName");
+  const current=getCurrent();
 
-  const name=
-    input
+  if(!current){
+    return;
+  }
+
+  const input=document.getElementById("personName");
+
+  const name=input
     ? input.value.trim()
     : "";
 
@@ -1408,10 +1412,15 @@ function createPerson(){
 
 function removePerson(id){
 
-  const p=
-    current.people.find(
-      x=>x.id===id
-    );
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
+
+  const p=current.people.find(
+    x=>x.id===id
+  );
 
   if(!p){
     return;
@@ -1425,7 +1434,6 @@ function removePerson(id){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1436,8 +1444,7 @@ function removePerson(id){
 
     <p>
 
-      ¿Quitar a
-      <b>${esc(p.name)}</b>?
+      ¿Quitar a <b>${esc(p.name)}</b>?
 
       Sus registros también se eliminarán.
 
@@ -1445,7 +1452,6 @@ function removePerson(id){
 
     <button
       class="danger"
-      type="button"
       style="width:100%"
       onclick="confirmRemovePerson('${id}')">
 
@@ -1460,15 +1466,19 @@ function removePerson(id){
 
 function confirmRemovePerson(id){
 
-  current.people=
-    current.people.filter(
-      p=>p.id!==id
-    );
+  const current=getCurrent();
 
-  current.logs=
-    current.logs.filter(
-      l=>l.personId!==id
-    );
+  if(!current){
+    return;
+  }
+
+  current.people=current.people.filter(
+    p=>p.id!==id
+  );
+
+  current.logs=current.logs.filter(
+    l=>l.personId!==id
+  );
 
   save();
 
@@ -1490,19 +1500,11 @@ function addOption(kind){
     <div class="modal-head">
 
       <h2>
-
-        Añadir
-        ${
-          kind==="cups"
-          ?"copa"
-          :"chupito"
-        }
-
+        Añadir ${kind==="cups"?"copa":"chupito"}
       </h2>
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1518,7 +1520,6 @@ function addOption(kind){
 
     <button
       class="primary"
-      type="button"
       onclick="createOption('${kind}')">
 
       Añadir opción
@@ -1530,29 +1531,21 @@ function addOption(kind){
 }
 
 
-/* =========================
-   CREAR OPCIÓN
-========================= */
-
 function createOption(kind){
 
-  const input=
-    document.getElementById("optionName");
+  const input=document.getElementById("optionName");
 
-  const n=
-    input
+  const name=input
     ? input.value.trim()
     : "";
 
-  if(!n){
+  if(!name){
     return;
   }
 
-  if(
-    !state.drinkOptions[kind].includes(n)
-  ){
+  if(!state.drinkOptions[kind].includes(name)){
 
-    state.drinkOptions[kind].push(n);
+    state.drinkOptions[kind].push(name);
 
   }
 
@@ -1566,7 +1559,7 @@ function createOption(kind){
 
 
 /* =========================
-   FINALIZAR FIESTA
+   FINALIZAR
 ========================= */
 
 function finishParty(){
@@ -1579,7 +1572,6 @@ function finishParty(){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1590,16 +1582,14 @@ function finishParty(){
 
     <p>
 
-      Podrás consultar las gráficas
-      y la clasificación.
-
-      Los registros quedarán guardados.
+      Los registros se quedarán guardados
+      y podrás consultar los resultados
+      cuando quieras.
 
     </p>
 
     <button
       class="primary"
-      type="button"
       onclick="confirmFinishParty()">
 
       🏁 Sí, finalizar
@@ -1612,6 +1602,18 @@ function finishParty(){
 
 
 function confirmFinishParty(){
+
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
+
+  /*
+    ESTA ES UNA DE LAS PARTES IMPORTANTES:
+    cambiamos la fiesta que está realmente
+    dentro de state y la guardamos.
+  */
 
   current.finished=true;
 
@@ -1628,43 +1630,37 @@ function confirmFinishParty(){
    RESULTADOS
 ========================= */
 
-function resultsHTML(){
+function resultsHTML(current){
 
-  const totals=
-    current.people.map(p=>({
+  const totals=current.people.map(p=>({
 
-      p:p,
+    p:p,
 
-      c:
-        current.logs.filter(
-          l=>
-            l.personId===p.id &&
-            l.kind==="cups"
-        ).length,
+    c:current.logs.filter(
+      l=>
+        l.personId===p.id &&
+        l.kind==="cups"
+    ).length,
 
-      s:
-        current.logs.filter(
-          l=>
-            l.personId===p.id &&
-            l.kind==="shots"
-        ).length
+    s:current.logs.filter(
+      l=>
+        l.personId===p.id &&
+        l.kind==="shots"
+    ).length
 
-    }));
+  }));
 
-  const max=
-    Math.max(
-      1,
-      ...totals.map(
-        x=>x.c+x.s
-      )
-    );
+  const max=Math.max(
+    1,
+    ...totals.map(
+      x=>x.c+x.s
+    )
+  );
 
-  const sorted=
-    [...totals].sort(
-      (a,b)=>
-        (b.c+b.s) -
-        (a.c+a.s)
-    );
+  const sorted=[...totals].sort(
+    (a,b)=>
+      (b.c+b.s)-(a.c+a.s)
+  );
 
   return `
 
@@ -1700,9 +1696,7 @@ function resultsHTML(){
 
               <div
                 class="bar"
-                style="
-                  width:${(x.c+x.s)/max*100}%;
-                ">
+                style="width:${(x.c+x.s)/max*100}%">
               </div>
 
             </div>
@@ -1761,15 +1755,12 @@ function resultsHTML(){
 
         current.logs
         .slice()
-        .sort(
-          (a,b)=>b.time-a.time
-        )
+        .sort((a,b)=>b.time-a.time)
         .map(l=>{
 
-          const p=
-            current.people.find(
-              x=>x.id===l.personId
-            );
+          const p=current.people.find(
+            x=>x.id===l.personId
+          );
 
           return `
 
@@ -1777,17 +1768,11 @@ function resultsHTML(){
 
               <span>
 
-                ${esc(
-                  p?.name || ""
-                )}
+                ${esc(p?.name || "")}
 
                 ·
 
-                ${
-                  l.kind==="cups"
-                  ?"🍹"
-                  :"🥃"
-                }
+                ${l.kind==="cups"?"🍹":"🥃"}
 
                 ${esc(l.drink)}
 
@@ -1816,9 +1801,7 @@ function resultsHTML(){
         :
 
         `<div class="empty">
-
           No hay registros.
-
         </div>`
       }
 
@@ -1830,10 +1813,16 @@ function resultsHTML(){
 
 
 /* =========================
-   MENÚ DE FIESTA
+   MENÚ
 ========================= */
 
 function partyMenu(){
+
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
 
   openModal(`
 
@@ -1843,7 +1832,6 @@ function partyMenu(){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1852,19 +1840,25 @@ function partyMenu(){
 
     </div>
 
-    <button
-      class="secondary"
-      type="button"
-      style="width:100%;margin:5px 0"
-      onclick="resumeParty()">
+    ${
+      current.finished
+      ?
+      `
+      <button
+        class="secondary"
+        style="width:100%;margin:5px 0"
+        onclick="resumeParty()">
 
-      ↩️ Volver a editar fiesta
+        ↩️ Volver a editar fiesta
 
-    </button>
+      </button>
+      `
+      :
+      ""
+    }
 
     <button
       class="danger"
-      type="button"
       style="width:100%;margin:5px 0"
       onclick="deleteParty()">
 
@@ -1877,7 +1871,17 @@ function partyMenu(){
 }
 
 
+/* =========================
+   VOLVER A EDITAR
+========================= */
+
 function resumeParty(){
+
+  const current=getCurrent();
+
+  if(!current){
+    return;
+  }
 
   current.finished=false;
 
@@ -1891,7 +1895,7 @@ function resumeParty(){
 
 
 /* =========================
-   ELIMINAR FIESTA
+   ELIMINAR
 ========================= */
 
 function deleteParty(){
@@ -1904,7 +1908,6 @@ function deleteParty(){
 
       <button
         class="iconbtn"
-        type="button"
         onclick="closeModal()">
 
         ×
@@ -1914,15 +1917,12 @@ function deleteParty(){
     </div>
 
     <p>
-
-      Esta acción eliminará toda
-      la fiesta y sus registros.
-
+      Esta acción eliminará toda la fiesta
+      y sus registros.
     </p>
 
     <button
       class="danger"
-      type="button"
       style="width:100%"
       onclick="confirmDeleteParty()">
 
@@ -1937,16 +1937,17 @@ function deleteParty(){
 
 function confirmDeleteParty(){
 
+  const current=getCurrent();
+
   if(!current){
     return;
   }
 
-  state.parties=
-    state.parties.filter(
-      p=>p.id!==current.id
-    );
+  state.parties=state.parties.filter(
+    p=>p.id!==current.id
+  );
 
-  current=null;
+  currentId=null;
 
   save();
 
@@ -1963,20 +1964,17 @@ function confirmDeleteParty(){
 
 function openModal(html){
 
-  const modal=
-    document.getElementById("modal");
+  const modal=document.getElementById("modal");
 
-  const modalBg=
-    document.getElementById("modalBg");
+  const bg=document.getElementById("modalBg");
 
   modal.innerHTML=html;
 
-  modalBg.classList.add("show");
+  bg.classList.add("show");
 
   setTimeout(()=>{
 
-    const input=
-      modal.querySelector("input");
+    const input=modal.querySelector("input");
 
     if(input){
       input.focus();
@@ -1995,10 +1993,6 @@ function closeModal(){
 
 }
 
-
-/* =========================
-   CERRAR MODAL TOCANDO FUERA
-========================= */
 
 document
   .getElementById("modalBg")
